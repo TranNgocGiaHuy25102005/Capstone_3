@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../zustand/authStore.js";
 
 export default function Profile() {
-  const { userInfor, isCheckingAuth, updateUserinfor } = useAuth();
+  const { userInfor, isCheckingAuth, updateUserinfor, orders, getOrders, setUserInfor } = useAuth();
+  
+  useEffect(() => {
+    setUserInfor()
+    getOrders()
+  }, [])
 
   const [formData, setFormData] = useState({
     name: "",
@@ -10,6 +15,8 @@ export default function Profile() {
     password: "",
     gender: true 
   });
+
+  console.log(orders)
 
   useEffect(() => {
     if (userInfor) {
@@ -161,63 +168,88 @@ export default function Profile() {
           Favourite
         </button>
       </div>
+      
       <div className="space-y-8">
-        <div>
-          <h3 className="text-purple-600 text-sm mb-2 font-medium">
-            + Orders have been placed on 09 - 19 - 2020
-          </h3>
-          <div className="w-full overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-200 text-gray-600 text-sm">
-                  <th className="p-3 w-16 text-center">id</th>
-                  <th className="p-3 w-24 text-center">img</th>
-                  <th className="p-3">name</th>
-                  <th className="p-3">price</th>
-                  <th className="p-3 text-center">quantity</th>
-                  <th className="p-3">total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-gray-100">
-                  <td className="p-3 text-center text-sm">1</td>
-                  <td className="p-3 text-center">
-                    <div className="w-12 h-12 bg-gray-100 mx-auto flex items-center justify-center">
-                      <span className="text-xs text-gray-400">Giày</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-sm">Product 1</td>
-                  <td className="p-3 text-sm">1000</td>
-                  <td className="p-3 text-center">
-                    <span className="bg-gray-200 px-3 py-1 rounded text-sm">
-                      1
-                    </span>
-                  </td>
-                  <td className="p-3 text-sm">1000</td>
-                </tr>
-              </tbody>
-            </table>
+        {orders && orders.length > 0 ? (
+          orders.map((order, index) => (
+            <div key={order.id || index}>
+              <h3 className="text-purple-600 text-sm mb-2 font-medium">
+                + Orders have been placed on {order.date ? new Date(order.date).toLocaleDateString("en-US") : "N/A"}
+              </h3>
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-200 text-gray-600 text-sm">
+                      <th className="p-3 w-16 text-center">id</th>
+                      <th className="p-3 w-24 text-center">img</th>
+                      <th className="p-3">name</th>
+                      <th className="p-3">price</th>
+                      <th className="p-3 text-center">quantity</th>
+                      <th className="p-3">total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Map qua mảng chi tiết sản phẩm của mỗi order, tùy chỉnh 'orderDetail' thành tên mảng thực tế từ API của bạn nếu cần */}
+                    {order.orderDetail?.map((item, idx) => (
+                      <tr key={idx} className="border-b border-gray-100">
+                        <td className="p-3 text-center text-sm">{item.id || idx + 1}</td>
+                        <td className="p-3 text-center">
+                          <div className="w-12 h-12 bg-gray-100 mx-auto flex items-center justify-center overflow-hidden">
+                            {item.image || item.img ? (
+                              <img 
+                                src={item.image || item.img} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-400">Giày</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3 text-sm">{item.name || "Product Name"}</td>
+                        <td className="p-3 text-sm">{item.price?.toLocaleString()}</td>
+                        <td className="p-3 text-center">
+                          <span className="bg-gray-200 px-3 py-1 rounded text-sm">
+                            {item.quantity || 1}
+                          </span>
+                        </td>
+                        <td className="p-3 text-sm">
+                          {((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 py-4">
+            Bạn chưa có lịch sử đặt hàng nào.
           </div>
+        )}
+      </div>
+      
+      {orders && orders.length > 0 && (
+        <div className="flex justify-end mt-8">
+          <nav className="inline-flex items-center gap-1">
+            <button className="p-1.5 border border-gray-300 rounded text-gray-400 hover:bg-gray-50 bg-gray-100 cursor-not-allowed">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button className="px-2.5 py-1 border border-purple-500 text-purple-600 rounded">1</button>
+            <button className="px-2.5 py-1 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded">2</button>
+            <span className="px-2.5 py-1 text-gray-400">...</span>
+            <button className="px-2.5 py-1 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded">10</button>
+            <button className="p-1.5 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </nav>
         </div>
-      </div>
-      <div className="flex justify-end mt-8">
-        <nav className="inline-flex items-center gap-1">
-          <button className="p-1.5 border border-gray-300 rounded text-gray-400 hover:bg-gray-50 bg-gray-100 cursor-not-allowed">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button className="px-2.5 py-1 border border-purple-500 text-purple-600 rounded">1</button>
-          <button className="px-2.5 py-1 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded">2</button>
-          <span className="px-2.5 py-1 text-gray-400">...</span>
-          <button className="px-2.5 py-1 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded">10</button>
-          <button className="p-1.5 border border-gray-300 rounded text-gray-600 hover:bg-gray-50">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </nav>
-      </div>
+      )}
     </div>
   );
 }
