@@ -10,6 +10,10 @@ import Home from './pages/Home';
 import Detail from './pages/Detail';
 import Login from './pages/Login';
 import Carts from './pages/Carts'; 
+import Search from './pages/Search'; 
+import Profile from './pages/Profile'; 
+import MainLayout from "./components/Layouts/MainLayout";
+import CustomerLayout from "./components/Layouts/CustomerLayout";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -22,7 +26,12 @@ root.render(
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="carts" element={<Carts />} />
+          <Route path='/search' element={<Search />} />
         </Route>
+        <Route element={<CustomerLayout />}>
+            <Route path='/carts' element={<Carts />} />
+            <Route path='/profile' element={<Profile />} />
+          </Route>
       </Routes>
     </BrowserRouter>
   </Provider>

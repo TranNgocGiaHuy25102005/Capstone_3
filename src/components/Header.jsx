@@ -1,10 +1,13 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import useCartStore from './../zustand/cartStore';
 
 export default function Header() {
   const { cartList } = useSelector((state) => state.cartReducer);
   const { currentUser } = useSelector((state) => state.userReducer);
+  const { cartCount } = useCartStore()
+  const navigate = useNavigate();
 
   const totalQuantity = cartList.reduce(
     (total, item) => total + item.quantityCart,
@@ -23,13 +26,22 @@ export default function Header() {
         </NavLink>
 
         <div className="flex items-center gap-6 font-semibold">
+          <div to="/search" className="flex items-center gap-2 text-xl"
+            onClick={() => {
+              navigate("/search")
+            }}>
+            <i className="fa-solid fa-magnifying-glass"></i>
+          </div>
           <NavLink to="/carts" className="flex items-center gap-2 text-xl">
             <i className="fa-solid fa-cart-shopping"></i>
-            <span>({totalQuantity})</span>
+            <span>({cartCount})</span>
           </NavLink>
 
           {currentUser ? (
-            <span className="text-yellow-400 font-bold">
+            <span className="text-yellow-400 font-bold"
+              onClick={() => {
+                navigate("/profile")
+              }}>
               Hi, {currentUser.email}
             </span>
           ) : (
